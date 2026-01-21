@@ -2,43 +2,16 @@
 project:
   name: "soccer-prediction-master"
   version: "1.0.0"
-  description: "Advanced soccer prediction system"
 
-data_sources:
-  football_data_org:
-    base_url: "https://api.football-data.org/v4"
-    # Get free API key from: https://www.football-data.org/client/register
-    api_key: "${FOOTBALL_DATA_API_KEY}"
-  
-  alternative_sources:
-    - name: "Understat"
-      url: "https://understat.com/"
-      type: "web_scraping"
-    - name: "FBref"
-      url: "https://fbref.com/"
-      type: "web_scraping"
-
-leagues:
-  premier_league:
-    code: "PL"
-    name: "Premier League"
-    country: "England"
-    seasons: ["2023-2024", "2022-2023", "2021-2022"]
-  
-  la_liga:
-    code: "PD"
-    name: "La Liga"
-    country: "Spain"
-    seasons: ["2023-2024", "2022-2023", "2021-2022"]
-  
-  serie_a:
-    code: "SA"
-    name: "Serie A"
-    country: "Italy"
-    seasons: ["2023-2024", "2022-2023", "2021-2022"]
+data:
+  leagues:
+    - name: "Premier League"
+      code: "EPL"
+    - name: "La Liga"
+      code: "LL"
+    - name: "Serie A"
+      code: "SA"
 
 modeling:
   test_size: 0.2
   random_state: 42
-  n_folds: 5
-  metrics: ["accuracy", "precision", "recall", "f1", "log_loss"]

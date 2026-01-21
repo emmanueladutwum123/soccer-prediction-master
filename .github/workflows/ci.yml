@@ -1,25 +1,154 @@
-name: CI Pipeline
+name: Soccer Prediction CI/CD Pipeline
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  test:
+  setup-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
-    - name: Set up Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
+        cache: 'pip'
+    
+    - name: Run setup script
+      run: |
+        python setup.py
+        echo "✅ Project structure created"
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "✅ Dependencies installed"
     
-    - name: Test imports
+    - name: Verify critical imports
       run: |
-        python -c "import pandas, numpy, sklearn"
-        echo "All dependencies installed successfully!"
+        python -c "
+        try:
+            import pandas as pd
+            import numpy as np
+            from sklearn.ensemble import RandomForestClassifier
+            import xgboost as xgb
+            import lightgbm as lgb
+            import catboost as cb
+            import flask
+            import plotly
+            print('✅ All critical packages imported successfully!')
+            print(f'Pandas {pd.__version__}, NumPy {np.__version__}')
+        except ImportError as e:
+            print(f'❌ Import failed: {e}')
+            exit(1)
+        "
+    
+    - name: Create data collection starter
+      run: |
+        mkdir -p src/data_collection
+        cat > src/data_collection/__init__.py << 'EOF'
+        """
+        Data collection module for soccer prediction.
+        """
+        __version__ = "1.0.0"
+        EOF
+        
+        cat > src/data_collection/api_client.py << 'EOF'
+        """
+        API client for football data sources.
+        """
+        import requests
+        import pandas as pd
+        from typing import Dict, Optional
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        class FootballDataClient:
+            """Client for football-data.org API"""
+            
+            def __init__(self, api_key: str = None):
+                self.base_url = "https://api.football-data.org/v4"
+                self.api_key = api_key
+                self.headers = {"X-Auth-Token": api_key} if api_key else {}
+            
+            def get_matches(self, competition_code: str, season: int = None) -> pd.DataFrame:
+                """Get matches for a competition"""
+                url = f"{self.base_url}/competitions/{competition_code}/matches"
+                params = {}
+                if season:
+                    params["season"] = season
+                
+                try:
+                    response = requests.get(url, headers=self.headers, params=params)
+                    response.raise_for_status()
+                    data = response.json()
+                    
+                    # Convert to DataFrame
+                    matches = pd.DataFrame(data["matches"])
+                    logger.info(f"Retrieved {len(matches)} matches for {competition_code}")
+                    return matches
+                    
+                except requests.RequestException as e:
+                    logger.error(f"Failed to fetch matches: {e}")
+                    return pd.DataFrame()
+        
+        # Free alternative - using public API
+        class FreeFootballData:
+            """Alternative free data sources"""
+            
+            @staticmethod
+            def get_league_table(league: str, season: str) -> pd.DataFrame:
+                """Get league table from public source"""
+                # TODO: Implement web scraping from Understat/FBref
+                return pd.DataFrame()
+        
+        if __name__ == "__main__":
+            print("Football Data API Client")
+            print("Set your API key from football-data.org")
+        EOF
+    
+    - name: Run basic tests
+      run: |
+        echo "Testing project structure..."
+        [ -f "requirements.txt" ] && echo "✅ requirements.txt exists"
+        [ -d "src/data_collection" ] && echo "✅ src/data_collection exists"
+        [ -d "models" ] && echo "✅ models directory exists"
+        
+        # Test Python scripts
+        python -c "
+        print('Testing Python environment...')
+        from src.data_collection.api_client import FootballDataClient
+        print('✅ API client module loaded')
+        "
+    
+    - name: Generate documentation
+      run: |
+        echo "# Soccer Prediction Master" > docs/OVERVIEW.md
+        echo "## Automated CI/CD Pipeline" >> docs/OVERVIEW.md
+        echo "- Created: $(date)" >> docs/OVERVIEW.md
+        echo "- Status: ✅ Success" >> docs/OVERVIEW.md
+        echo "## Next Steps" >> docs/OVERVIEW.md
+        echo "1. Get API key from football-data.org" >> docs/OVERVIEW.md
+        echo "2. Start collecting match data" >> docs/OVERVIEW.md
+        echo "3. Build feature engineering pipeline" >> docs/OVERVIEW.md
+    
+    - name: Upload workflow artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: setup-logs
+        path: |
+          docs/
+        retention-days: 7

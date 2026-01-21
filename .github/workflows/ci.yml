@@ -112,35 +112,6 @@ jobs:
         echo 'print("3. Start building your prediction system")' >> main.py
         echo "✅ main.py created"
     
-    - name: Create README.md if missing
-      run: |
-        if [ ! -f "README.md" ]; then
-          echo "📚 Creating README.md..."
-          echo '# ⚽ Soccer Prediction Master' > README.md
-          echo '' >> README.md
-          echo 'Advanced machine learning system for soccer match predictions.' >> README.md
-          echo '' >> README.md
-          echo '## Setup' >> README.md
-          echo '' >> README.md
-          echo '1. Clone repository' >> README.md
-          echo '2. Run: `python setup.py`' >> README.md
-          echo '3. Install: `pip install -r requirements.txt`' >> README.md
-          echo '4. Start building!' >> README.md
-          echo '' >> README.md
-          echo '## Project Structure' >> README.md
-          echo '' >> README.md
-          echo '- `data/` - Match data' >> README.md
-          echo '- `src/` - Source code' >> README.md
-          echo '- `models/` - ML models' >> README.md
-          echo '- `web_app/` - Dashboard' >> README.md
-          echo '' >> README.md
-          echo '## License' >> README.md
-          echo 'MIT License' >> README.md
-          echo "✅ README.md created"
-        else
-          echo "📚 README.md already exists"
-        fi
-    
     - name: Install dependencies
       run: |
         echo "📦 Installing dependencies..."
@@ -175,7 +146,6 @@ jobs:
         echo "- 📦 requirements.txt with 10 packages" >> $GITHUB_STEP_SUMMARY
         echo "- ⚙️ setup.py script" >> $GITHUB_STEP_SUMMARY
         echo "- 🎯 main.py entry point" >> $GITHUB_STEP_SUMMARY
-        echo "- 📚 README.md documentation" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
         echo "1. Start building data collection module" >> $GITHUB_STEP_SUMMARY

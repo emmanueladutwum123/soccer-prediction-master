@@ -137,24 +137,22 @@ EOF
         
         echo "✅ Data collection module created"
     
-    - name: Create other Python files
+    - name: Create __init__.py files
       run: |
-        echo "📝 Creating other Python files..."
+        echo "📝 Creating __init__.py files..."
         
         # Create src/__init__.py
         echo '"""Soccer Prediction Master - Main Package"""' > src/__init__.py
         echo '__version__ = "1.0.0"' >> src/__init__.py
         echo '__author__ = "Soccer Prediction Team"' >> src/__init__.py
-        echo 'print(f"⚽ Soccer Prediction Master v{__version__}")' >> src/__init__.py
         
         # Create other __init__.py files
-        for dir in src/feature_engineering src/modeling src/prediction src/web_app; do
+        for dir in src/feature_engineering src/modeling src/prediction src/web_app web_app; do
           echo '"""Package initialization"""' > $dir/__init__.py
+          echo "Created $dir/__init__.py"
         done
         
-        echo '"""Web application package"""' > web_app/__init__.py
-        
-        echo "✅ Other Python files created"
+        echo "✅ All __init__.py files created"
     
     - name: Create main.py
       run: |
@@ -357,26 +355,28 @@ EOF
     - name: Run tests
       run: |
         echo "🧪 Running tests..."
+        echo ""
         echo "1. Testing status command..."
         python main.py status
-        echo "✅ Status command works"
-        
+        echo ""
         echo "2. Testing collect command..."
         python main.py collect --league EPL --season 2023-2024
-        echo "✅ Collect command works"
-        
+        echo ""
         echo "3. Testing predict command..."
         python main.py predict --home "Man United" --away "Liverpool"
-        echo "✅ Predict command works"
-        
+        echo ""
         echo "4. Testing train command..."
         python main.py train --model xgboost --epochs 10
-        echo "✅ Train command works"
-        
+        echo ""
+        echo "5. Testing file creation..."
+        echo "Checking created files:"
+        ls -la data/raw/
+        echo ""
         echo "🎉 All tests passed!"
     
     - name: Show success message
       run: |
+        echo ""
         echo "========================================"
         echo "🎉 SOCCER PREDICTION MASTER SETUP COMPLETE!"
         echo "========================================"

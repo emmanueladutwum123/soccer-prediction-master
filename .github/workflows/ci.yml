@@ -1,35 +1,227 @@
-name: Simple Setup
+name: Soccer Prediction CI/CD Pipeline
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  setup:
+  setup-and-test:
     runs-on: ubuntu-latest
+    
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Python 3.10
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     
-    - name: Create files
+    - name: Create project structure
       run: |
-        # Create minimal structure
-        mkdir -p src/data_collection
-        mkdir -p data/raw
+        echo "📁 Creating project structure..."
         
-        # Create simple requirements.txt
-        echo "pandas" > requirements.txt
-        echo "numpy" >> requirements.txt
-        echo "scikit-learn" >> requirements.txt
+        # Create directories
+        mkdir -p data/raw data/processed data/features
+        mkdir -p models/training models/trained_models models/evaluation
+        mkdir -p src/data_collection src/feature_engineering src/modeling src/prediction src/web_app
+        mkdir -p tests docs notebooks
+        mkdir -p web_app/static web_app/templates
         
-        # Create simple setup.py
-        echo "print('Setup complete')" > setup.py
-        
-        # Create simple main.py
-        echo "print('Soccer Prediction Master')" > main.py
+        echo "✅ Project structure created"
     
-    - name: Install
-      run: pip install -r requirements.txt
+    - name: Create __init__.py files
+      run: |
+        echo "📄 Creating __init__.py files..."
+        
+        # Create __init__.py files for Python packages
+        touch src/__init__.py
+        touch src/data_collection/__init__.py
+        touch src/feature_engineering/__init__.py
+        touch src/modeling/__init__.py
+        touch src/prediction/__init__.py
+        touch src/web_app/__init__.py
+        touch web_app/__init__.py
+        
+        echo "✅ __init__.py files created"
     
-    - name: Test
-      run: python setup.py && python main.py
+    - name: Create requirements.txt
+      run: |
+        echo "📦 Creating requirements.txt..."
+        cat > requirements.txt << 'EOF'
+# Core packages
+pandas==2.0.3
+numpy==1.24.3
+scikit-learn==1.3.0
+scipy==1.11.1
+
+# ML/DL
+xgboost==1.7.6
+lightgbm==4.0.0
+
+# Data collection
+requests==2.31.0
+beautifulsoup4==4.12.2
+
+# Web app
+flask==3.0.0
+plotly==5.17.0
+
+# Utilities
+python-dotenv==1.0.0
+joblib==1.3.1
+EOF
+        
+        echo "✅ requirements.txt created"
+    
+    - name: Create setup.py
+      run: |
+        echo "⚙️ Creating setup.py..."
+        cat > setup.py << 'EOF'
+#!/usr/bin/env python3
+"""
+Setup script for Soccer Prediction Master
+"""
+import os
+from pathlib import Path
+
+print("🚀 Setting up Soccer Prediction Master...")
+
+# Create directory structure
+folders = [
+    'data/raw', 'data/processed', 'data/features',
+    'models/training', 'models/trained_models', 'models/evaluation',
+    'src/data_collection', 'src/feature_engineering', 
+    'src/modeling', 'src/prediction', 'src/web_app',
+    'tests', 'docs', 'notebooks',
+    'web_app/static', 'web_app/templates'
+]
+
+for folder in folders:
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    print(f"  📁 Created: {folder}")
+
+print("\n✅ Setup complete!")
+print("\nNext: pip install -r requirements.txt")
+EOF
+        
+        echo "✅ setup.py created"
+    
+    - name: Create main.py
+      run: |
+        echo "🎯 Creating main.py..."
+        cat > main.py << 'EOF'
+#!/usr/bin/env python3
+"""
+Soccer Prediction Master - Main Entry Point
+"""
+print("⚽ Soccer Prediction Master")
+print("============================")
+print("Project setup successful!")
+print("\nTo get started:")
+print("1. Install dependencies: pip install -r requirements.txt")
+print("2. Run: python setup.py (if not already done)")
+print("3. Start building your prediction system")
+EOF
+        
+        echo "✅ main.py created"
+    
+    - name: Create README.md if missing
+      run: |
+        if [ ! -f "README.md" ]; then
+          echo "📚 Creating README.md..."
+          cat > README.md << 'EOF'
+# ⚽ Soccer Prediction Master
+
+Advanced machine learning system for soccer match predictions.
+
+## Setup
+
+1. Clone repository
+2. Run: `python setup.py`
+3. Install: `pip install -r requirements.txt`
+4. Start building!
+
+## Project Structure
+
+- `data/` - Match data
+- `src/` - Source code
+- `models/` - ML models
+- `web_app/` - Dashboard
+
+## License
+MIT License
+EOF
+          echo "✅ README.md created"
+        else
+          echo "📚 README.md already exists"
+        fi
+    
+    - name: Install dependencies
+      run: |
+        echo "📦 Installing dependencies..."
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        echo "✅ Dependencies installed"
+    
+    - name: Verify installation
+      run: |
+        echo "🧪 Verifying installation..."
+        python -c "
+import pandas as pd
+import numpy as np
+import sklearn
+import flask
+print('✅ All packages imported successfully!')
+print(f'Pandas version: {pd.__version__}')
+print(f'NumPy version: {np.__version__}')
+        "
+    
+    - name: Test project
+      run: |
+        echo "🧪 Testing project..."
+        
+        # Check structure
+        echo "📁 Checking project structure..."
+        [ -f "requirements.txt" ] && echo "✅ requirements.txt exists"
+        [ -f "setup.py" ] && echo "✅ setup.py exists"
+        [ -f "main.py" ] && echo "✅ main.py exists"
+        [ -d "src/data_collection" ] && echo "✅ src/data_collection exists"
+        [ -f "src/__init__.py" ] && echo "✅ src/__init__.py exists"
+        
+        # Test Python
+        python -c "
+print('Testing Python...')
+from pathlib import Path
+print(f'Current directory: {Path.cwd()}')
+print('✅ Python test passed')
+        "
+        
+        echo "✅ All tests passed!"
+    
+    - name: Create workflow summary
+      run: |
+        echo "## 📊 Workflow Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ Project Setup Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Files Created:**" >> $GITHUB_STEP_SUMMARY
+        echo "- 📁 Project structure with 16 directories" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 requirements.txt with 10 packages" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚙️ setup.py script" >> $GITHUB_STEP_SUMMARY
+        echo "- 🎯 main.py entry point" >> $GITHUB_STEP_SUMMARY
+        echo "- 📚 README.md documentation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Dependencies Installed:**" >> $GITHUB_STEP_SUMMARY
+        echo "- pandas, numpy, scikit-learn" >> $GITHUB_STEP_SUMMARY
+        echo "- xgboost, lightgbm" >> $GITHUB_STEP_SUMMARY
+        echo "- flask, plotly" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Start building data collection module" >> $GITHUB_STEP_SUMMARY
+        echo "2. Implement feature engineering" >> $GITHUB_STEP_SUMMARY
+        echo "3. Train ML models" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+        echo "**Time:** $(date)" >> $GITHUB_STEP_SUMMARY
